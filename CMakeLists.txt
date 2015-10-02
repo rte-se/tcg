@@ -2,22 +2,18 @@ cmake_minimum_required(VERSION 3.2)
 
 project (tcg)
 
-option(BIG_ENDIAN "Big endian" OFF)
+option (BIG_ENDIAN "Big endian" OFF)
+set (WORD_SIZE "32" CACHE STRING "Word size")
+set (ARCHITECTURE "i386" CACHE STRING "Architecture")
 
-# Determine bitness
-# 32 or 64 bits
-set (HOST_BITS 32)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set (HOST_BITS 64)
-endif()
+set_property (CACHE WORD_SIZE PROPERTY STRINGS 32 64)
+set_property (CACHE ARCHITECTURE PROPERTY STRINGS i386 arm)
 
-set (HOST "i386" CACHE STRING "Host architecture")
-set_property (CACHE HOST PROPERTY STRINGS i386 arm)
+string (TOUPPER ${ARCHITECTURE} ARCHITECTURE_UPPER)
 
-string (TOUPPER ${HOST} HOST_UPPER)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
-if(${HOST_BITS} EQUAL 64)
+if(${WORD_SIZE} EQUAL 64)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
@@ -31,10 +27,10 @@ add_definitions (
     -DCONFIG_SOFTMMU
     -DNEED_CPU_H
     -DNDEBUG
-    -DTCG_TARGET_${HOST_UPPER}
-    -DHOST_BITS_${HOST_BITS})
+    -DTCG_TARGET_${ARCHITECTURE_UPPER}
+    -DHOST_BITS_${WORD_SIZE})
 
-include_directories (${HOST})
+include_directories (${ARCHITECTURE})
 
 add_library (tcg STATIC
     additional.c
